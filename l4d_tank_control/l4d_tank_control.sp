@@ -94,7 +94,6 @@ public OnClientDisconnect(client)
  */
 public OnRoundStart()
 {
-	LogMessage("On round start called");
 	CreateTimer(10.0, newGame);
 }
 
@@ -106,7 +105,6 @@ public Action:newGame(Handle:timer)
 	// If it's a new game, reset the tank pool
 	if (teamAScore == 0 && teamBScore == 0)
 	{
-		LogMessage("New game, resetting the tank pool.");
 		h_whosHadTank = CreateArray(64);
 		queuedTankSteamId = "";
 	}
@@ -132,18 +130,15 @@ public PlayerLeftStartArea_Event(Handle:event, const String:name[], bool:dontBro
  */
 public PlayerTeam_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
-	PrintToConsoleAll("[TC] Player changed team");
 	new L4D2Team:oldTeam = L4D2Team:GetEventInt(event, "oldteam");
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	decl String:tmpSteamId[64];
 	
 	if (client && oldTeam == L4D2Team:L4D2Team_Infected)
 	{
-		PrintToConsoleAll("[TC] Player was infected");
 		GetClientAuthString(client, tmpSteamId, sizeof(tmpSteamId));
 		if (strcmp(queuedTankSteamId, tmpSteamId) == 0)
 		{
-			PrintToConsoleAll("[TC] Player was tank");
 			chooseTank();
 			outputTankToAll();
 		}
@@ -187,14 +182,12 @@ public Action:Tank_Cmd(client, args)
 	// Only output if we have a queued tank
 	if (! strcmp(queuedTankSteamId, ""))
 	{
-		PrintToConsoleAll("[TC] Tank not queued");
 		return Plugin_Handled;
 	}
 	
 	tankClientId = getInfectedPlayerBySteamId(queuedTankSteamId);
 	if (tankClientId != -1)
 	{
-		PrintToConsoleAll("[TC] Tank client id: %d | Steam id: %s", tankClientId, queuedTankSteamId);
 		GetClientName(tankClientId, tankClientName, sizeof(tankClientName));
 		
 		// If on infected, print to entire team
@@ -215,10 +208,6 @@ public Action:Tank_Cmd(client, args)
 			CPrintToChat(client, "{olive}%s {default}will become the tank!", tankClientName);
 		}
 	}
-	else 
-	{
-		PrintToConsoleAll("[TC] Unable to fetch client id for: %s", queuedTankSteamId);
-	}
 	
 	return Plugin_Handled;
 }
@@ -234,9 +223,7 @@ public Action:TankShuffle_Cmd(client, args)
 
 // Tank shuffle command
 public Action:GiveTank_Cmd(client, args)
-{
-	PrintToConsoleAll("[TC] Give tank called");
-	
+{	
 	// Who are we targetting?
 	new String:arg1[32];
 	GetCmdArg(1, arg1, sizeof(arg1));
@@ -245,31 +232,26 @@ public Action:GiveTank_Cmd(client, args)
 	new target = FindTarget(client, arg1);
 	if (target == -1)
 	{
-		PrintToConsoleAll("[TC] Unable to find target");
 		return Plugin_Handled;
 	}
 	
 	// Get the players name
 	new String:name[MAX_NAME_LENGTH]; 
 	GetClientName(target, name, sizeof(name));
-	PrintToConsoleAll("[TC] Player name: %s", name);
 	
 	// Set the tank
 	if (IsClientConnected(target) && IsClientInGame(target) && ! IsFakeClient(target))
 	{
-		PrintToConsoleAll("[TC] Valid client");
 		// Checking if on our desired team
 		if (L4D2Team:GetClientTeam(target) != L4D2Team:L4D2Team_Infected)
 		{
-			PrintToConsoleAll("[TC] Player not on infected");
 			CPrintToChatAll("{olive}[SM] {default}%s not on infected. Unable to give tank", name);
 			return Plugin_Handled;
 		}
 		
 		decl String:steamId[64];
 		GetClientAuthString(target, steamId, sizeof(steamId));
-		
-		PrintToConsoleAll("Giving tank to: %s", steamId);
+
 		queuedTankSteamId = steamId;
 		outputTankToAll();
 	}
@@ -294,7 +276,6 @@ public chooseTank()
 	for (new i = 0; i < GetArraySize(infectedPool); i++)
 	{
 		GetArrayString(infectedPool, i, steamId, sizeof(steamId));
-		PrintToConsoleAll("[TC] Player on infected: %s", steamId);
 	}
 	
 	// If there is nobody on the infected team, return (otherwise we'd be stuck trying to select forever)
@@ -307,7 +288,6 @@ public chooseTank()
 	// Remove the currently queued tank from the pool
 	if (strcmp(queuedTankSteamId, "") != 0)
 	{
-		PrintToConsoleAll("[TC] Removing queued tank from pool");
 		index = FindStringInArray(infectedPool, queuedTankSteamId);
 		if (index != -1)
 		{
@@ -315,36 +295,17 @@ public chooseTank()
 		}
 	}
 	
-	// Output players who've had tank (debug)
-	PrintToConsoleAll("[TC] Players who've had tank: ");	
-	for (new i = 0; i < GetArraySize(h_whosHadTank); i++)
-	{
-		GetArrayString(h_whosHadTank, i, steamId, sizeof(steamId));
-		PrintToConsoleAll(" - %s", steamId);
-	}
-	
-	// Output players still in pool
-	for (new i = 0; i < GetArraySize(infectedPool); i++)
-	{
-		GetArrayString(infectedPool, i, steamId, sizeof(steamId));
-		PrintToConsoleAll("[TC] In infected pool: %s", steamId);
-	}
-	
 	// If the infected pool is empty, remove infected players from pool
 	if (GetArraySize(infectedPool) == 0) // (when nobody on infected ,error)
 	{
-		PrintToConsoleAll("[TC] Size of infected pool is 0");
 		new Handle:infectedTeam = teamSteamIds(L4D2Team_Infected);
-		PrintToConsoleAll("[TC] size of infected team: %d", GetArraySize(infectedTeam));
 		if (GetArraySize(infectedTeam) > 1)
 		{
-			PrintToConsoleAll("[TC] Infected pool empty. Re-adding all infected players.");
 			h_whosHadTank = removeTanksFromPool(h_whosHadTank, teamSteamIds(L4D2Team_Infected));
 			chooseTank();
 		}
 		else
 		{
-			PrintToConsoleAll("[TC] No players on infected. Clearing tank queue.");
 			queuedTankSteamId = "";
 		}
 		
