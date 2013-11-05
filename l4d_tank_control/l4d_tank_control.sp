@@ -7,12 +7,6 @@
 #include <left4downtown>
 #include <colors>
 
-/**
- * Considerations:
- *     - When tank dies, cue someone else to become tank (useful on finales) (ut)
- *  - Handle multiple tanks at once
- */
-
 new Handle:h_whosHadTank;
 new String:queuedTankSteamId[64];
 
@@ -21,8 +15,8 @@ public Plugin:myinfo =
     name = "L4D2 Tank Control",
     author = "arti",
     description = "Distributes the role of the tank evenly throughout the team",
-    version = "0.0.14",
-    url = "<- URL ->"
+    version = "0.0.15",
+    url = "https://github.com/alexberriman/l4d2-plugins/tree/master/l4d_tank_control"
 }
 
 enum L4D2Team
@@ -92,6 +86,7 @@ public OnClientDisconnect(client)
 /**
  * When a new game starts, reset the tank pool.
  */
+ 
 public OnRoundStart()
 {
     CreateTimer(10.0, newGame);
@@ -113,12 +108,16 @@ public Action:newGame(Handle:timer)
 /**
  * When the round ends, reset the active tank.
  */
+ 
 public RoundEnd_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
     queuedTankSteamId = "";
 }
 
-// When players leaves the start area
+/**
+ * When a player leaves the start area, choose a tank and output to all.
+ */
+ 
 public PlayerLeftStartArea_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
     chooseTank();
@@ -128,6 +127,7 @@ public PlayerLeftStartArea_Event(Handle:event, const String:name[], bool:dontBro
 /**
  * When the queued tank switches teams, choose a new one
  */
+ 
 public PlayerTeam_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
     new L4D2Team:oldTeam = L4D2Team:GetEventInt(event, "oldteam");
@@ -173,7 +173,11 @@ public TankKilled_Event(Handle:event, const String:name[], bool:dontBroadcast)
 }
 
 
-// Boss command
+/**
+ * When a player wants to find out whos becoming tank,
+ * output to them.
+ */
+ 
 public Action:Tank_Cmd(client, args)
 {
     new tankClientId;
@@ -212,7 +216,11 @@ public Action:Tank_Cmd(client, args)
     return Plugin_Handled;
 }
 
-// Tank shuffle command
+/**
+ * Shuffle the tank (randomly give to another player in
+ * the pool.
+ */
+ 
 public Action:TankShuffle_Cmd(client, args)
 {
     chooseTank();
@@ -221,7 +229,10 @@ public Action:TankShuffle_Cmd(client, args)
     return Plugin_Handled;
 }
 
-// Tank shuffle command
+/**
+ * Give the tank to a specific player.
+ */
+ 
 public Action:GiveTank_Cmd(client, args)
 {    
     // Who are we targetting?
@@ -317,6 +328,10 @@ public chooseTank()
     GetArrayString(infectedPool, rndIndex, queuedTankSteamId, sizeof(queuedTankSteamId));
 }
 
+/**
+ * Make sure we give the tank to our queued player.
+ */
+ 
 public Action:L4D_OnTryOfferingTankBot(tank_index, &bool:enterStatis)
 {    
     // Reset the tank's frustration if need be
@@ -482,6 +497,7 @@ public getInfectedPlayerBySteamId(const String:steamId[])
  * @param ...            Variable number of format parameters. 
  * @noreturn 
  */ 
+ 
 stock PrintToConsoleAll(const String:format[], any:...) 
 { 
     decl String:text[192]; 
