@@ -282,13 +282,6 @@ public chooseTank()
     // Create our pool of players to choose from
     new Handle:infectedPool = teamSteamIds(L4D2Team_Infected);
     
-    // Output players on infected team (debug)
-    decl String:steamId[64];
-    for (new i = 0; i < GetArraySize(infectedPool); i++)
-    {
-        GetArrayString(infectedPool, i, steamId, sizeof(steamId));
-    }
-    
     // If there is nobody on the infected team, return (otherwise we'd be stuck trying to select forever)
     if (GetArraySize(infectedPool) == 0)
         return;
