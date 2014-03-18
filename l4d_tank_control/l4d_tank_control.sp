@@ -398,13 +398,12 @@ public outputTankToAll()
         GetClientName(tankClientId, tankClientName, sizeof(tankClientName));
         if (GetConVarBool(hTankPrint))
         {
-        CPrintToChatAll("{olive}%s {default}will become the tank!", tankClientName);
+            CPrintToChatAll("{olive}%s {default}will become the tank!", tankClientName);
         }
         else
         {
-        PrintToInfected("{olive}%s {default}will become the tank!", tankClientName);
+            PrintToInfected("{olive}%s {default}will become the tank!", tankClientName);
         }
-        
     }
 }
 
@@ -413,10 +412,14 @@ stock PrintToInfected(const String:Message[], any:... )
     decl String:sPrint[256];
     VFormat(sPrint, sizeof(sPrint), Message, 2);
 
-    for (new i = 1; i <= MaxClients; i++) {
-        if (!IS_VALID_INFECTED(i)) { continue; }
+    for (new i = 1; i <= MaxClients; i++) 
+    {
+        if (!IS_VALID_INFECTED(i)) 
+        { 
+            continue; 
+        }
 
-        CPrintToChat(i, "\x01%s", sPrint);
+        CPrintToChat(i, "{default}%s", sPrint);
     }
 }
 /**
