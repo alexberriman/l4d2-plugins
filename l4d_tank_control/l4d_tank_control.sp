@@ -7,15 +7,21 @@
 #include <left4downtown>
 #include <colors>
 
+#define IS_VALID_CLIENT(%1)     (%1 > 0 && %1 <= MaxClients)
+#define IS_INFECTED(%1)         (GetClientTeam(%1) == 3)
+#define IS_VALID_INGAME(%1)     (IS_VALID_CLIENT(%1) && IsClientInGame(%1))
+#define IS_VALID_INFECTED(%1)   (IS_VALID_INGAME(%1) && IS_INFECTED(%1))
+
 new Handle:h_whosHadTank;
 new String:queuedTankSteamId[64];
+new Handle:hTankPrint;
 
 public Plugin:myinfo = 
 {
     name = "L4D2 Tank Control",
     author = "arti",
     description = "Distributes the role of the tank evenly throughout the team",
-    version = "0.0.15",
+    version = "0.0.16",
     url = "https://github.com/alexberriman/l4d2-plugins/tree/master/l4d_tank_control"
 }
 
@@ -62,6 +68,9 @@ public OnPluginStart()
     // Admin commands
     RegAdminCmd("sm_tankshuffle", TankShuffle_Cmd, ADMFLAG_SLAY, "Re-picks at random someone to become tank.");
     RegAdminCmd("sm_givetank", GiveTank_Cmd, ADMFLAG_SLAY, "Gives the tank to a selected player");
+    
+    // Cvars
+    hTankPrint = CreateConVar("tankcontrol_print_all", "1", "Who gets to see who will become the tank? (0 = Infected, 1 = Everyone)", FCVAR_PLUGIN);
 }
 
 /**
@@ -207,7 +216,7 @@ public Action:Tank_Cmd(client, args)
         }
         
         // Otherwise just print to the player who typed the command
-        else
+        else if (GetConVarBool(hTankPrint))
         {
             CPrintToChat(client, "{olive}%s {default}will become the tank!", tankClientName);
         }
@@ -376,7 +385,7 @@ public setTankTickets(const String:steamId[], const tickets)
 }
 
 /**
- * Output the tank to everyone on the server
+ * Output who will become tank
  */
  
 public outputTankToAll()
@@ -387,11 +396,29 @@ public outputTankToAll()
     if (tankClientId != -1)
     {
         GetClientName(tankClientId, tankClientName, sizeof(tankClientName));
+        if (GetConVarBool(hTankPrint))
+        {
         CPrintToChatAll("{olive}%s {default}will become the tank!", tankClientName);
+        }
+        else
+        {
+        PrintToInfected("{olive}%s {default}will become the tank!", tankClientName);
+        }
+        
     }
 }
 
+stock PrintToInfected(const String:Message[], any:... )
+{
+    decl String:sPrint[256];
+    VFormat(sPrint, sizeof(sPrint), Message, 2);
 
+    for (new i = 1; i <= MaxClients; i++) {
+        if (!IS_VALID_INFECTED(i)) { continue; }
+
+        CPrintToChat(i, "\x01%s", sPrint);
+    }
+}
 /**
  * Returns an array of steam ids for a particular team.
  * 
