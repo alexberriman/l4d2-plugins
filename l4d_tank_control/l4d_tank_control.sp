@@ -48,7 +48,7 @@ enum ZClass
 
 public OnPluginStart()
 {
-    // Load translations (for targetting player)
+    // Load translations (for targeting player)
     LoadTranslations("common.phrases");
     
     // Event hooks
@@ -175,7 +175,7 @@ public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
             if (GetConVarBool(hTankDebug))
             {
                 PrintToConsoleAll("[TC] Tank died(1), choosing a new tank");
-            }
+            }            
             chooseTank();
         }
     }
@@ -307,16 +307,6 @@ public chooseTank()
     // Remove players who've already had tank from the pool.
     infectedPool = removeTanksFromPool(infectedPool, h_whosHadTank);
     
-    // Remove the currently queued tank from the pool
-    if (strcmp(queuedTankSteamId, "") != 0)
-    {
-        index = FindStringInArray(infectedPool, queuedTankSteamId);
-        if (index != -1)
-        {
-            RemoveFromArray(infectedPool, index);
-        }
-    }
-    
     // If the infected pool is empty, remove infected players from pool
     if (GetArraySize(infectedPool) == 0) // (when nobody on infected ,error)
     {
@@ -367,6 +357,7 @@ public Action:L4D_OnTryOfferingTankBot(tank_index, &bool:enterStatis)
     if (! strcmp(queuedTankSteamId, ""))
         chooseTank();
     
+    // Mark the player as having had tank
     if (strcmp(queuedTankSteamId, "") != 0)
     {
         setTankTickets(queuedTankSteamId, 20000);
