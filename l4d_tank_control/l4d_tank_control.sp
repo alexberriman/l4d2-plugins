@@ -183,7 +183,7 @@ public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
 
 public TankKilled_Event(Handle:event, const String:name[], bool:dontBroadcast) 
 {
-    if (GetConVarBool(hTankPrint))
+    if (GetConVarBool(hTankDebug))
     {
         PrintToConsoleAll("[TC] Tank died(2), choosing a new tank");
     }
