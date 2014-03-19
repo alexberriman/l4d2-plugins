@@ -46,6 +46,40 @@ enum ZClass
     ZClass_Tank = 8
 }
 
+public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
+{
+    CreateNative("TankControl_GetTankPool", Native_GetTankPool);
+    
+    return APLRes_Success;
+}
+
+public Native_GetTankPool(Handle:plugin, numParams)
+{
+    // Create our pool of players to choose from
+    new Handle:infectedPool = teamSteamIds(L4D2Team_Infected);
+    
+    // If there is nobody on the infected team, return (otherwise we'd be stuck trying to select forever)
+    if (GetArraySize(infectedPool) == 0)
+        return CloseHandle(infectedPool);
+    
+    // Remove players who've already had tank from the pool.
+    infectedPool = removeTanksFromPool(infectedPool, h_whosHadTank);
+    
+    // If the infected pool is empty, remove infected players from pool
+    if (GetArraySize(infectedPool) == 0) // (when nobody on infected ,error)
+    {
+        new Handle:infectedTeam = teamSteamIds(L4D2Team_Infected);
+        if (GetArraySize(infectedTeam) > 1)
+        {
+            h_whosHadTank = removeTanksFromPool(h_whosHadTank, teamSteamIds(L4D2Team_Infected));
+            infectedPool = removeTanksFromPool(infectedPool, h_whosHadTank);
+        }
+    }
+    
+    // Return the infected pool
+    return CloseHandle(infectedPool);
+}
+
 public OnPluginStart()
 {
     // Load translations (for targeting player)
@@ -73,7 +107,6 @@ public OnPluginStart()
     // Cvars
     hTankPrint = CreateConVar("tankcontrol_print_all", "1", "Who gets to see who will become the tank? (0 = Infected, 1 = Everyone)", FCVAR_PLUGIN);
     hTankDebug = CreateConVar("tankcontrol_debug", "0", "Whether or not to debug to console", FCVAR_PLUGIN);
-
 }
 
 /**
