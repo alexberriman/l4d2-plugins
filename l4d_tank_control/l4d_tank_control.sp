@@ -15,6 +15,7 @@
 new Handle:h_whosHadTank;
 new String:queuedTankSteamId[64];
 new Handle:hTankPrint;
+new Handle:hTankDebug;
 
 public Plugin:myinfo = 
 {
@@ -71,6 +72,8 @@ public OnPluginStart()
     
     // Cvars
     hTankPrint = CreateConVar("tankcontrol_print_all", "1", "Who gets to see who will become the tank? (0 = Infected, 1 = Everyone)", FCVAR_PLUGIN);
+    hTankDebug = CreateConVar("tankcontrol_debug", "0", "Whether or not to debug to console", FCVAR_PLUGIN);
+
 }
 
 /**
@@ -169,7 +172,10 @@ public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
         zombieClass = GetEntProp(victim, Prop_Send, "m_zombieClass");
         if (ZClass:zombieClass == ZClass_Tank) 
         {
-            PrintToConsoleAll("[TC] Tank died(1), choosing a new tank");
+            if (GetConVarBool(hTankDebug))
+            {
+                PrintToConsoleAll("[TC] Tank died(1), choosing a new tank");
+            }
             chooseTank();
         }
     }
@@ -177,7 +183,10 @@ public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
 
 public TankKilled_Event(Handle:event, const String:name[], bool:dontBroadcast) 
 {
-    PrintToConsoleAll("[TC] Tank died(2), choosing a new tank");
+    if (GetConVarBool(hTankPrint))
+    {
+        PrintToConsoleAll("[TC] Tank died(2), choosing a new tank");
+    }
     chooseTank();
 }
 
