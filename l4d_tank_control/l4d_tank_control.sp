@@ -295,8 +295,6 @@ public Action:GiveTank_Cmd(client, args)
  
 public chooseTank()
 {
-    decl index;
-    
     // Create our pool of players to choose from
     new Handle:infectedPool = teamSteamIds(L4D2Team_Infected);
     
