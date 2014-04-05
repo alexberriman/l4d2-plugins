@@ -29,6 +29,15 @@ This plugin adds a bit more strategy to the game, but there are still areas it c
 
 * **Omitting from PUGs/mixes** - this plugin can cause issues in pugs for a few reasons. It only really works if a team is able to unanimously (generally 3/1 or 4/0) decide on who will become tank. In pugs, its likely the plugin may be abused with everybody either voting for themselves, or voting to troll (deliberately giving a player bad tank, etc.). What's more, it raises the possibility of players opting to only play certain tanks. I think it's important that players should practice playing all different kind of tanks, and having the option to vote on match day.
 
+## Dependencies
+* Sourcemod
+* SDK Tools
+* l4d2util
+* l4d2_direct
+* [colors](https://forums.alliedmods.net/showthread.php?t=96831)
+* [l4d\_tank_control](https://github.com/alexberriman/l4d2-plugins/tree/master/l4d_tank_control)
+* [readyup](https://github.com/CanadaRox/l4d2readyup)
+
 ## Frequently asked questions
 #### What's to stop one player voting on themselves to become tank each round?
 That's actually impossible. This plugin simply removes the random element from the tank control plugin. Once a player has become tank, they're removed from the tank pool (and thus you're unable to vote for them) until all players have become tank. 
