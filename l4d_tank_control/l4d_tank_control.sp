@@ -22,7 +22,7 @@ public Plugin:myinfo =
     name = "L4D2 Tank Control",
     author = "arti",
     description = "Distributes the role of the tank evenly throughout the team",
-    version = "0.0.16",
+    version = "0.1.0",
     url = "https://github.com/alexberriman/l4d2-plugins/tree/master/l4d_tank_control"
 }
 
@@ -49,12 +49,39 @@ enum ZClass
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
     CreateNative("TankControl_GetTankPool", Native_GetTankPool);
+    CreateNative("TankControl_SetTank", Native_SetTank);
     
     return APLRes_Success;
 }
 
-public Native_GetTankPool(Handle:plugin, numParams)
+/**
+ * Set the player to become tank
+ */
+ 
+public Native_SetTank(Handle:plugin, numParams)
 {
+    new len;
+    GetNativeStringLength(1, len);
+
+    if (len <= 0)
+    {
+        return;
+    }
+
+    // Retrieve the arg
+    new String:steamId[len + 1];
+    GetNativeString(1, steamId, len + 1);
+    
+    // Queue that bad boy
+    strcopy(queuedTankSteamId, sizeof(queuedTankSteamId), steamId);
+}
+
+/**
+ * Native to retrieve the players currently available in the tank queued
+ */
+
+public Native_GetTankPool(Handle:plugin, numParams)
+{    
     // Create our pool of players to choose from
     new Handle:infectedPool = teamSteamIds(L4D2Team_Infected);
     
@@ -77,7 +104,7 @@ public Native_GetTankPool(Handle:plugin, numParams)
     }
     
     // Return the infected pool
-    return CloseHandle(infectedPool);
+    return CloneHandle(infectedPool);
 }
 
 public OnPluginStart()
@@ -161,11 +188,31 @@ public RoundEnd_Event(Handle:event, const String:name[], bool:dontBroadcast)
 
 /**
  * When a player leaves the start area, choose a tank and output to all.
+ *
+ * This method should only queue a new tank when:
+ *  1. There is no tank queued, OR
+ *  2. The queued tank doesn't pass validation (is not on infected team)
  */
  
 public PlayerLeftStartArea_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
-    chooseTank();
+    // Only choose a tank if nobody has been queued
+    if (! strcmp(queuedTankSteamId, ""))
+    {        
+        chooseTank();
+    }
+    
+    // If the queued tank is not a valid infected player, choose another
+    else
+    {
+        new tankClientId = getInfectedPlayerBySteamId(queuedTankSteamId);
+        if (! IS_VALID_INFECTED(tankClientId))
+        {
+            chooseTank();
+        }
+    }
+    
+    
     outputTankToAll();
 }
 
@@ -285,7 +332,7 @@ public Action:TankShuffle_Cmd(client, args)
  */
  
 public Action:GiveTank_Cmd(client, args)
-{    
+{
     // Who are we targetting?
     new String:arg1[32];
     GetCmdArg(1, arg1, sizeof(arg1));
@@ -438,6 +485,13 @@ public outputTankToAll()
     }
 }
 
+/**
+ * Prints a message to the infected team
+ *
+ * @param String:Message[]
+ *  The message to print
+ */
+ 
 stock PrintToInfected(const String:Message[], any:... )
 {
     decl String:sPrint[256];
@@ -453,6 +507,7 @@ stock PrintToInfected(const String:Message[], any:... )
         CPrintToChat(i, "{default}%s", sPrint);
     }
 }
+
 /**
  * Returns an array of steam ids for a particular team.
  * 
