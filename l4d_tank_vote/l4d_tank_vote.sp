@@ -43,7 +43,9 @@ public OnPluginStart()
     LoadTranslations("common.phrases");
     
     // Initialise the tank data arrays
-    initHandles();
+    h_tankVotes = CreateArray(64);
+    h_whosVoted = CreateArray(64);
+    h_tankVoteSteamIds = CreateArray(64);
     
     // Vote on who becomes tank
     RegConsoleCmd("sm_tankvote", Tank_Vote, "Vote on who becomes the tank");
@@ -59,11 +61,11 @@ public OnPluginStart()
  * Initialise the handles (also used to reset handles)
  */
  
-public initHandles()
+public clearHandles()
 {
-    h_tankVotes = CreateArray(64);
-    h_whosVoted = CreateArray(64);
-    h_tankVoteSteamIds = CreateArray(64);
+    ClearArray(h_tankVotes);
+    ClearArray(h_whosVoted);
+    ClearArray(h_tankVoteSteamIds);
 }
 
 /**
@@ -98,7 +100,7 @@ public setTank()
     // If nobody has voted on someone to become tank, nothing to do
     if (GetArraySize(h_tankVoteSteamIds) == 0)
     {
-        initHandles();
+        clearHandles();
         return;
     }
     
@@ -126,7 +128,7 @@ public setTank()
     TankControl_SetTank(steamId);
     
     // Reset the handles
-    initHandles();
+    clearHandles();
 }
 
 /**

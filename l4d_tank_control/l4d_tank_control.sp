@@ -13,6 +13,7 @@
 #define IS_VALID_INFECTED(%1)   (IS_VALID_INGAME(%1) && IS_INFECTED(%1))
 
 new Handle:h_whosHadTank;
+new Handle:h_tankQueue;
 new String:queuedTankSteamId[64];
 new Handle:hTankPrint;
 new Handle:hTankDebug;
@@ -83,28 +84,28 @@ public Native_SetTank(Handle:plugin, numParams)
 public Native_GetTankPool(Handle:plugin, numParams)
 {    
     // Create our pool of players to choose from
-    new Handle:infectedPool = teamSteamIds(L4D2Team_Infected);
+    h_tankQueue = teamSteamIds(L4D2Team_Infected);
     
     // If there is nobody on the infected team, return (otherwise we'd be stuck trying to select forever)
-    if (GetArraySize(infectedPool) == 0)
-        return CloseHandle(infectedPool);
+    if (GetArraySize(h_tankQueue) == 0)
+        return _:h_tankQueue;
     
     // Remove players who've already had tank from the pool.
-    infectedPool = removeTanksFromPool(infectedPool, h_whosHadTank);
+    h_tankQueue = removeTanksFromPool(h_tankQueue, h_whosHadTank);
     
     // If the infected pool is empty, remove infected players from pool
-    if (GetArraySize(infectedPool) == 0) // (when nobody on infected ,error)
+    if (GetArraySize(h_tankQueue) == 0) // (when nobody on infected ,error)
     {
         new Handle:infectedTeam = teamSteamIds(L4D2Team_Infected);
         if (GetArraySize(infectedTeam) > 1)
         {
             h_whosHadTank = removeTanksFromPool(h_whosHadTank, teamSteamIds(L4D2Team_Infected));
-            infectedPool = removeTanksFromPool(infectedPool, h_whosHadTank);
+            h_tankQueue = removeTanksFromPool(h_tankQueue, h_whosHadTank);
         }
     }
     
     // Return the infected pool
-    return CloneHandle(infectedPool);
+    return _:h_tankQueue;
 }
 
 public OnPluginStart()

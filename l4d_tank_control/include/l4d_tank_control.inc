@@ -16,4 +16,4 @@ native Handle:TankControl_GetTankPool();
  * @param str      Steam id to set as tank.
  * @noreturn
  */
-native Handle:TankControl_SetTank(String:steamId[]);
+native TankControl_SetTank(String:steamId[]);
