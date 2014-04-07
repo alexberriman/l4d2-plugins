@@ -23,7 +23,7 @@ public Plugin:myinfo =
     name = "L4D2 Tank Control",
     author = "arti",
     description = "Distributes the role of the tank evenly throughout the team",
-    version = "0.1.0",
+    version = "0.2.1",
     url = "https://github.com/alexberriman/l4d2-plugins/tree/master/l4d_tank_control"
 }
 

@@ -24,7 +24,7 @@ public Plugin:myinfo =
     name = "L4D2 Tank Vote",
     author = "arti",
     description = "Allows players to vote on who should be tank during the round",
-    version = "0.0.1",
+    version = "0.1",
     url = ""
 }
 
