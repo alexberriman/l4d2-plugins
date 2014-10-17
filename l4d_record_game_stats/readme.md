@@ -57,3 +57,23 @@ The plugin should collect tonnes of data and store it in a central repository. T
         - Jockeyed by
     - Survivor boomed
         - Boomed by
+    - Pills used
+        - Used by
+    - Survivor takes dmg
+        - Taken by (infected player+class)
+    - FF dmg taken
+        - Taken by
+        - Amount
+    - Pause started
+        - Paused by
+    - Pause ended
+    - Survivor swapped gun
+        - Swapped from/to
+    - SI takes damage
+        - Damage by
+        - Total amount
+    - Survivor killed common
+    - Survivor landed deadstop
+    - Survivor cuts tongue
+    - Survivor takes fall damage
+    
